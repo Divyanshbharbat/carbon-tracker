@@ -103,47 +103,55 @@ app.post("/api/carbon/upload", upload.single("receipt"), async (req, res) => {
     const publicId = req.file.originalname.replace(/\s+/g, "_").split(".")[0];
     let cloudUrl = "";
 
-    // Check if file exists in Cloudinary
+    // ------------------ Cloudinary upload/check ------------------
     try {
       const result = await cloudinary.api.resource(`receipts/${publicId}`);
-      console.log("✅ Image already exists:", result.secure_url);
       cloudUrl = result.secure_url;
+      console.log("✅ Image already exists:", cloudUrl);
     } catch (err) {
       const uploadRes = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream({ folder: "receipts", public_id: publicId }, (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        });
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "receipts", public_id: publicId },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
         stream.end(req.file.buffer);
       });
-      console.log("✅ Uploaded new image:", uploadRes.secure_url);
       cloudUrl = uploadRes.secure_url;
+      console.log("✅ Uploaded new image:", cloudUrl);
     }
 
-    // Extract text using OCR
+    // ------------------ OCR extraction ------------------
     const extractedText = await extractTextOCR(cloudUrl);
+    console.log("📄 OCR extracted text:\n", extractedText);
 
-    // Python API for carbon calculation
-    const pythonRes = await axios.post("http://127.0.0.1:5000/calculate", { text: extractedText });
-    console.log("divyansh",pythonRes.data)
-    const totalCarbon = pythonRes.data. total_emission_kgCO2 || 0;
+    // ------------------ Gemini cleanup / extract items ------------------
+  const geminiPrompt = `
+From the following receipt text, extract only the food item names along with their quantities 
+(ignore prices, GST, waiter, etc). Format each item like: "Item Name - Quantity".
 
-    // Save carbon entry
+Receipt text: "${extractedText}"
+
+Return as a simple list of items with quantities.
+`;
+    const geminiSummary = await generateWithGemini(geminiPrompt);
+    console.log("✍️ Cleaned items from Gemini:\n", geminiSummary);
+
+    // ------------------ Carbon calculation ------------------
+    const pythonRes = await axios.post("http://127.0.0.1:5000/calculate", { text: geminiSummary });
+    const totalCarbon = pythonRes.data.carbon_emission_total || 0;
+    console.log("💨 Total carbon:",  totalCarbon);
+
+    // ------------------ Save to user ------------------
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, error: "User not found" });
 
     user.carbonEntries.push({ totalCarbon, date: new Date() });
     await user.save();
 
-    // ✅ Ask Gemini for a natural summary
-const geminiPrompt = `
-From the following receipt text, extract only the food item names (ignore prices, GST, waiter, etc).
-Receipt text: "${extractedText}"
-
-Return as a simple list of items.
-`;
-    const geminiSummary = await generateWithGemini(geminiPrompt);
-
+    // ------------------ Response ------------------
     res.json({ 
       success: true, 
       message: "Carbon footprint stored!", 

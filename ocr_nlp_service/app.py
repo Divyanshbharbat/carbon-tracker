@@ -1,9 +1,9 @@
-from flask import Flask, request, jsonify
 import re
+from flask import Flask, request, jsonify
+from difflib import get_close_matches
 
 app = Flask(__name__)
 
-# Carbon factors for common food items (kg CO2e per serving)
 CARBON_FACTORS = {
     "ghee": 9.0,
     "milk": 3.2,
@@ -13,60 +13,76 @@ CARBON_FACTORS = {
     "apple": 0.4,
     "banana": 0.5,
     "bread": 1.1,
-    "pongal": 4.0,   # Pongal is rice+ghee mix (approximate)
+    "pongal": 4.0,
     "vada": 1.5,
     "roast": 2.0,
     "poori": 3.0,
-
-    # newly added items
-    "fish burger": 8.0,    # approx (fish + bread + condiments)
-    "fish chips": 7.5,     # fried fish + potato fries
-    "soft drink": 0.3      # per 330ml can (avg value)
+    "fish burger": 6.0,
+    "fish chips": 5.5,
+    "soft drink": 0.3,
 }
 
+def parse_item_quantity(text_line):
+    """Parse lines like '* rian chips - 2' and return (item_name, quantity)"""
+    match = re.match(r"[*\s]*([\w\s]+)-\s*(\d+)", text_line.strip())
+    if match:
+        item_name = match.group(1).strip().lower()
+        quantity = int(match.group(2))
+        print(f"🔹 Parsed line: '{text_line.strip()}' => item: '{item_name}', qty: {quantity}")
+        return item_name, quantity
+    return None, 0
 
-def clean_text(text):
-    """Clean OCR text: lowercase, remove special chars"""
-    text = text.lower()
-    text = re.sub(r"[^a-z0-9\s]", " ", text)  # remove non-alphanumeric
-    return text
+def map_to_known_item(item_name):
+    """Fuzzy match OCR/Gemini item name to known CARBON_FACTORS keys"""
+    matches = get_close_matches(item_name, CARBON_FACTORS.keys(), n=1, cutoff=0.6)
+    if matches:
+        print(f"✅ Mapped '{item_name}' to known item '{matches[0]}'")
+        return matches[0]
+    else:
+        print(f"⚠️ No close match found for '{item_name}'")
+        return None
+
 @app.route("/calculate", methods=["POST"])
 def calculate_carbon():
     data = request.json
     raw_text = data.get("text", "")
-    print("📥 Raw text received:", raw_text)  # Debug
-
+    print("📥 Raw text received:", raw_text)
+    
     if not raw_text:
         print("❌ No text provided in request")
-        return jsonify({"error": "No text provided"}), 400
+        return jsonify({"status": "error", "message": "No text provided"}), 400
 
-    text = clean_text(raw_text)
-    print("✅ Cleaned text:", text)  # Debug
-
-    found_items = {}
     total_emission = 0.0
+    found_items = {}
 
-    for item, factor in CARBON_FACTORS.items():
-        if item in text:
-            count = len(re.findall(item, text))
-            emission = count * factor
-            found_items[item] = {
-                "count": count,
-                "factor": factor,
-                "emission": emission
-            }
-            total_emission += emission
+    # Split text into lines
+    lines = raw_text.split("\n")
+    for line in lines:
+        item_name, qty = parse_item_quantity(line)
+        if item_name:
+            known_item = map_to_known_item(item_name)
+            if known_item:
+                factor = CARBON_FACTORS[known_item]
+                emission = qty * factor
+                total_emission += emission
+                found_items[known_item] = {
+                    "count": qty,
+                    "factor": factor,
+                    "emission": round(emission, 2)
+                }
+                print(f"📊 Calculated emission for '{known_item}': {emission} kgCO2")
+            else:
+                print(f"⚠️ Item not recognized: {item_name}")
 
-            print(f"🔍 Found item: {item}, Count: {count}, "
-                  f"Factor: {factor}, Emission: {emission}")  # Debug
-
-    print("📊 Final found items:", found_items)  # Debug
-    print("🌍 Total emission (kgCO2):", total_emission)  # Debug
+    print("🌍 Total carbon emission:", total_emission)
+    print("📋 Item breakdown:", found_items)
 
     return jsonify({
-        "items": found_items,
-        "total_emission_kgCO2": round(total_emission, 2)
+        "status": "success",
+        "extracted_text": raw_text,
+        "carbon_emission_total": round(total_emission, 2),
+        "item_breakdown": found_items
     })
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
