@@ -1,0 +1,201 @@
+Food Item,Category,Carbon_Footprint_kgCO2e
+Pakora 3,Dessert,1.02
+Momos 8,Dessert,5.04
+Waffles 6,Side Dish,0.65
+Spring Roll 8,Beverage,9.47
+Pancakes 2,Main Dish,7.48
+Mango Lassi 9,Side Dish,3.05
+Soup 7,Snack,2.92
+Dal Fry 8,Main Dish,1.19
+Sandwich 10,Main Dish,4.02
+Hot Dog 6,Dessert,5.88
+Pizza 5,Main Dish,6.09
+Smoothie 4,Breakfast,6.19
+Milkshake 2,Beverage,1.96
+Chicken Curry 3,Main Dish,3.25
+Soup 6,Main Dish,1.69
+Biryani 5,Side Dish,0.54
+Gulab Jamun,Snack,8.37
+Beef Steak 7,Dessert,7.88
+Hot Dog 4,Beverage,7.87
+Tea,Main Dish,5.11
+Tea 10,Breakfast,5.8
+Pizza 5,Dessert,0.95
+Coffee,Beverage,8.02
+Coffee 10,Main Dish,5.9
+Chow Mein 6,Beverage,1.97
+Coffee 3,Breakfast,1.63
+Chole 10,Main Dish,7.7
+Pancakes 6,Snack,7.43
+Smoothie 7,Dessert,8.04
+Ice Cream 5,Main Dish,1.59
+Burger 4,Dessert,3.06
+Pasta 9,Beverage,5.19
+Egg Curry 2,Main Dish,4.94
+Rice,Side Dish,1.68
+Sandwich,Dessert,1.62
+Roast Vegetables 6,Side Dish,0.94
+Momos 7,Main Dish,7.12
+Salad 3,Side Dish,5.07
+Puri 4,Breakfast,6.38
+Chicken Curry 5,Main Dish,2.01
+Beef Steak,Dessert,3.9
+Roast Vegetables,Snack,6.18
+Paneer Curry 5,Side Dish,4.4
+Hot Dog 6,Beverage,0.51
+Pizza 7,Side Dish,3.46
+Spring Roll 9,Beverage,5.44
+Pancakes 9,Side Dish,7.95
+Mango Lassi 6,Side Dish,6.84
+Mango Lassi 10,Beverage,9.36
+Pancakes 8,Side Dish,1.26
+Aloo Gobi 9,Main Dish,2.16
+Fried Rice 3,Side Dish,9.96
+Cake 6,Main Dish,2.92
+Butter Chicken 3,Snack,7.22
+Milkshake,Beverage,8.62
+Pancakes 4,Main Dish,7.68
+Sandwich 6,Dessert,0.97
+Sandwich 5,Dessert,4.79
+Chow Mein 7,Dessert,3.9
+Pizza 10,Main Dish,3.55
+Curd 5,Breakfast,2.25
+Soup 6,Side Dish,2.72
+Sandwich 9,Snack,9.99
+Puri 9,Breakfast,4.21
+Gulab Jamun 3,Dessert,6.88
+Pancakes 9,Breakfast,6.56
+French Fries 4,Dessert,9.73
+Lemonade,Side Dish,5.1
+Chow Mein 9,Beverage,2.65
+Chicken Curry 5,Dessert,9.68
+Milkshake 2,Main Dish,4.31
+French Fries 3,Snack,1.18
+Fried Rice 10,Snack,9.1
+Masala Dosa 7,Main Dish,3.76
+Roast Vegetables 7,Side Dish,4.92
+Poha,Main Dish,6.04
+Mango Lassi 9,Dessert,9.28
+Egg Curry 2,Beverage,3.02
+Chole 2,Beverage,9.4
+Smoothie,Beverage,1.99
+Milkshake 9,Main Dish,9.29
+Curd,Snack,8.51
+Ice Cream 8,Snack,7.32
+Cake 3,Breakfast,5.19
+Fried Rice 7,Side Dish,6.46
+Fried Rice 10,Breakfast,4.31
+Lemonade 3,Beverage,5.07
+Burger 7,Snack,4.54
+Pancakes 6,Side Dish,2.71
+Salad 4,Side Dish,4.7
+Pizza 5,Main Dish,9.68
+Fish Fry 9,Dessert,7.23
+Coffee 9,Breakfast,0.65
+Fish Fry 7,Main Dish,2.18
+French Fries 2,Side Dish,3.01
+Masala Tea 5,Side Dish,9.55
+Beef Steak 4,Dessert,6.5
+Tea 5,Beverage,9.65
+Coca Cola 10,Snack,2.73
+Chow Mein 6,Dessert,0.73
+Curd,Beverage,4.03
+Fish Fry 6,Beverage,9.14
+Idli 10,Side Dish,9.93
+Spring Roll 4,Main Dish,5.15
+Coffee 4,Main Dish,5.08
+Fish Fry,Breakfast,9.29
+Cake 7,Breakfast,2.73
+Chocolate 6,Main Dish,6.9
+Bread 10,Beverage,7.26
+Fried Rice 4,Dessert,0.33
+Pizza 4,Beverage,2.96
+Salad 9,Side Dish,9.0
+Chow Mein 2,Main Dish,8.76
+Waffles 4,Beverage,7.83
+Samosa 4,Breakfast,2.42
+Smoothie 7,Breakfast,5.41
+Beef Steak 7,Beverage,1.54
+Gulab Jamun 4,Main Dish,7.59
+Lemonade 8,Side Dish,9.98
+Rice 3,Breakfast,9.0
+Salad 8,Side Dish,1.29
+Egg Curry 8,Beverage,1.27
+Pizza 9,Dessert,6.36
+Hot Dog 7,Side Dish,4.99
+Chicken Curry 5,Dessert,5.73
+Momos 2,Dessert,7.14
+Coffee 6,Main Dish,9.68
+Rice 9,Beverage,5.68
+Hot Dog 7,Beverage,3.13
+Vadai 2,Side Dish,7.56
+Bread 5,Snack,6.43
+Coca Cola,Snack,3.09
+Sandwich 4,Beverage,7.88
+Curd 3,Breakfast,8.47
+Samosa 9,Breakfast,4.32
+Waffles 2,Main Dish,7.87
+Poha 9,Dessert,7.85
+Sandwich,Dessert,3.82
+Chole 9,Dessert,6.91
+Fried Rice 3,Breakfast,2.41
+Coffee 9,Side Dish,9.13
+Chole 3,Breakfast,1.9
+Masala Dosa 3,Side Dish,7.06
+Sandwich 3,Snack,4.53
+Momos 6,Breakfast,5.58
+Salad 7,Main Dish,2.61
+Curd 2,Side Dish,7.38
+Chow Mein 10,Breakfast,6.23
+Rice 3,Side Dish,0.33
+Pasta 10,Breakfast,9.78
+Coffee 2,Dessert,1.35
+Pizza 3,Beverage,8.73
+Soup 3,Side Dish,5.05
+Mango Lassi 9,Side Dish,7.64
+Chocolate 4,Main Dish,9.7
+Masala Dosa 5,Main Dish,2.37
+Puri 5,Breakfast,0.43
+Aloo Gobi 5,Beverage,8.89
+Masala Dosa 10,Breakfast,2.48
+Pakora 3,Main Dish,1.69
+Spring Roll 4,Dessert,6.64
+Pancakes 7,Main Dish,1.55
+Pizza 9,Snack,3.89
+Tea 5,Snack,4.52
+Egg Curry 10,Breakfast,4.64
+Dal Fry 5,Dessert,5.55
+Egg Curry 9,Breakfast,4.58
+Hot Dog 8,Beverage,5.74
+Mango Lassi 8,Dessert,8.78
+Fried Rice 3,Beverage,9.26
+Dal Fry 6,Side Dish,7.57
+Masala Dosa 9,Beverage,7.7
+Roast Vegetables 3,Dessert,3.41
+Chicken Curry 3,Main Dish,5.33
+Smoothie 8,Dessert,1.4
+Cake 10,Main Dish,5.3
+Naan 3,Snack,7.74
+Spring Roll 2,Breakfast,5.39
+Poha 5,Snack,6.49
+Soup 6,Snack,8.59
+Naan 3,Main Dish,4.24
+Gulab Jamun 2,Beverage,8.37
+Aloo Gobi,Snack,2.14
+Smoothie 8,Main Dish,7.69
+Biryani 3,Main Dish,4.23
+Fried Rice 9,Snack,8.49
+Naan 8,Beverage,9.41
+Curd 8,Dessert,1.75
+Chow Mein 2,Beverage,9.35
+Lemonade 8,Dessert,8.45
+Milkshake 3,Snack,5.96
+Milkshake 4,Main Dish,9.4
+Tea 9,Breakfast,5.84
+Salad 3,Snack,2.01
+Naan 3,Snack,7.23
+Burger 2,Side Dish,0.6
+Samosa,Snack,6.91
+Naan 3,Main Dish,4.35
+Smoothie 4,Breakfast,4.64
+Fried Rice 5,Snack,8.66
