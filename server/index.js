@@ -93,11 +93,16 @@ async function extractTextOCR(imageUrl) {
 }
 
 // ---------------------- Upload + Extract + Carbon + Gemini ----------------------
+// ---------------------- Upload + Extract + Carbon + Gemini ----------------------
 app.post("/api/carbon/upload", upload.single("receipt"), async (req, res) => {
   try {
     const userId = req.body.userId;
-    if (!req.file) return res.status(400).json({ success: false, error: "No file uploaded" });
-    if (!userId) return res.status(400).json({ success: false, error: "User ID required" });
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "No file uploaded" });
+    }
+    if (!userId) {
+      return res.status(400).json({ success: false, error: "User ID required" });
+    }
 
     // Sanitize filename
     const publicId = req.file.originalname.replace(/\s+/g, "_").split(".")[0];
@@ -128,7 +133,7 @@ app.post("/api/carbon/upload", upload.single("receipt"), async (req, res) => {
     console.log("📄 OCR extracted text:\n", extractedText);
 
     // ------------------ Gemini cleanup / extract items ------------------
-  const geminiPrompt = `
+    const geminiPrompt = `
 From the following receipt text, extract only the food item names along with their quantities 
 (ignore prices, GST, waiter, etc). Format each item like: "Item Name - Quantity".
 
@@ -140,23 +145,63 @@ Return as a simple list of items with quantities.
     console.log("✍️ Cleaned items from Gemini:\n", geminiSummary);
 
     // ------------------ Carbon calculation ------------------
-    const pythonRes = await axios.post("http://127.0.0.1:5000/calculate", { text: geminiSummary });
+    const pythonRes = await axios.post("http://127.0.0.1:5001/calculate", { text: geminiSummary });
     const totalCarbon = pythonRes.data.carbon_emission_total || 0;
-    console.log("💨 Total carbon:",  totalCarbon);
+    console.log("💨 Total carbon:", totalCarbon);
 
     // ------------------ Save to user ------------------
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
 
-    user.carbonEntries.push({ totalCarbon, date: new Date() });
+    const now = new Date();
+// Convert Gemini summary into structured food items
+// Convert Gemini summary into structured food items with actual carbon emission values
+const foodItems = geminiSummary.split('\n')
+  .map(line => line.trim())
+  .filter(line => line.startsWith("*"))
+  .map(line => {
+    const match = line.match(/\* (.+) - (\d+)/);
+    if (match) {
+      const name = match[1].trim();
+      const quantity = parseInt(match[2].trim(), 10);
+
+      // Lookup carbon emission from pythonRes
+      const itemData = pythonRes.data.item_breakdown[name.toLowerCase()]; // case-insensitive lookup
+      const carbon = itemData ? itemData.emission : 0; // fallback to 0 if not found
+
+      return {
+        name,
+        quantity,
+        unit: 'kg', // default, adjust if needed
+        carbon
+      };
+    }
+    return null;
+  })
+  .filter(item => item !== null);
+
+
+    // Just push – schema will auto-generate entryDate (YYYY-MM-DD)
+    user.carbonEntries.push({
+      uploadDate: now,
+      totalCarbon,
+      food: foodItems,  
+      shopping: [],
+      travel: []
+    });
+
     await user.save();
 
     // ------------------ Response ------------------
-    res.json({ 
-      success: true, 
-      message: "Carbon footprint stored!", 
-      totalCarbon, 
-      geminiSummary 
+    res.json({
+      success: true,
+      message: "Carbon footprint stored!",
+      totalCarbon,
+      geminiSummary,
+      uploadDate: now
+      // entryDate will also be in user.carbonEntries[last].entryDate
     });
 
   } catch (err) {
@@ -164,6 +209,7 @@ Return as a simple list of items with quantities.
     res.status(500).json({ success: false, error: "Error processing receipt" });
   }
 });
+
 
 // ---------------------- User Carbon History ----------------------
 app.get("/api/carbon/:userId", async (req, res) => {
@@ -183,12 +229,14 @@ app.get("/api/carbon/:userId", async (req, res) => {
 
 // Signup
 app.post('/api/signup', async (req, res) => {
+  console.log(req.body)
   const { name, email, password } = req.body;
 
   try {
     // check existing
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log("divaysh")
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -203,7 +251,7 @@ app.post('/api/signup', async (req, res) => {
       cart: [],
       carbonEntries: []
     });
-    await newUser.save();
+  await newUser.save();
 
     res.status(201).json({ message: "Signup successful" });
   } catch (error) {

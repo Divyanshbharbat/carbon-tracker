@@ -35,7 +35,6 @@ function Home() {
   useEffect(() => {
     AOS.init({ duration: 1000, once: true });
     const token = localStorage.getItem("token");
- 
 
     axios
       .get("http://localhost:5000/api/user/me", {
@@ -74,6 +73,7 @@ function Home() {
       );
 
       setCarbonScore(res.data.totalCarbon || 0);
+      console.log("divynsh"+res.data)
       fetchCarbonHistory(user._id, token);
     } catch (err) {
       console.error(err);
@@ -91,7 +91,7 @@ function Home() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log(res.data.carbonEntries)
+      console.log(res.data)
       setCarbonHistory(res.data.carbonEntries || []);
     } catch (err) {
       console.error("Failed to fetch carbon history", err);
@@ -107,7 +107,71 @@ function Home() {
         ).toFixed(2)
       : 0;
 
-  // Pie Chart Data
+  // Helper: pick color by time
+  const getTimeColor = (dateStr) => {
+    const hour = new Date(dateStr).getHours();
+    if (hour >= 5 && hour < 11) return "rgba(30, 136, 229, 0.7)"; // Morning
+    if (hour >= 11 && hour < 16) return "rgba(67, 160, 71, 0.7)"; // Afternoon
+    if (hour >= 16 && hour < 21) return "rgba(255, 152, 0, 0.7)"; // Evening
+    return "rgba(156, 39, 176, 0.7)"; // Night
+  };
+
+  // Group entries by entryDate
+  const grouped = {};
+  carbonHistory.forEach((entry) => {
+    const dateKey = entry.entryDate; // YYYY-MM-DD
+    if (!grouped[dateKey]) grouped[dateKey] = [];
+    grouped[dateKey].push(entry);
+  });
+
+  const barLabels = Object.keys(grouped); // unique dates
+  const maxEntries = Math.max(...Object.values(grouped).map(arr => arr.length));
+
+  const colors = [
+    "rgba(30, 136, 229, 0.7)",
+    "rgba(67, 160, 71, 0.7)",
+    "rgba(255, 152, 0, 0.7)",
+    "rgba(156, 39, 176, 0.7)",
+    "rgba(229, 57, 53, 0.7)"
+  ];
+
+  const datasets = [];
+  for (let idx = 0; idx < maxEntries; idx++) {
+    datasets.push({
+      label: `Entry ${idx + 1}`,
+      data: barLabels.map((date) => {
+        const entry = grouped[date][idx];
+        return entry ? entry.totalCarbon : 0;
+      }),
+      backgroundColor: colors[idx % colors.length],
+      borderWidth: 1,
+      borderRadius: 6,
+    });
+  }
+
+  const barData = {
+    labels: barLabels,
+    datasets,
+  };
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true },
+    },
+    scales: {
+      x: {
+        stacked: true,
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        ticks: { stepSize: 5 },
+      },
+    },
+  };
+
   const pieData = {
     labels: ["Shopping", "Travel", "Food"],
     datasets: [
@@ -132,64 +196,10 @@ function Home() {
     ],
   };
 
-  // Bar Chart Gradient
-  const barGradient = (ctx) => {
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, "#1E88E5");
-    gradient.addColorStop(1, "#43A047");
-    return gradient;
-  };
-
-  const barData = {
-    labels: carbonHistory.map((c) =>
-      new Date(c.date).toLocaleString([], {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    ),
-    datasets: [
-      {
-        label: "Carbon Footprint (kg CO₂e)",
-        data: carbonHistory.map((c) => c.totalCarbon),
-        backgroundColor: (context) => barGradient(context.chart.ctx),
-        borderColor: "#1565C0",
-        borderWidth: 2,
-        borderRadius: 6,
-      },
-    ],
-  };
-
-  const barOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { stepSize: 2 },
-      },
-    },
-  };
-
-  // Helper to get background color by time
-  const getTimeColor = (dateStr) => {
-    const hour = new Date(dateStr).getHours();
-    if (hour >= 5 && hour < 11) return "#E3F2FD"; // Morning - light blue
-    if (hour >= 11 && hour < 16) return "#E8F5E9"; // Afternoon - light green
-    if (hour >= 16 && hour < 21) return "#FFF3E0"; // Evening - light orange
-    return "#F3E5F5"; // Night - light purple
-  };
-
   return (
     <div className="container mt-5">
       {user ? (
         <>
-          {/* User Info */}
           <div className="text-center mb-5" data-aos="fade-down">
             <h2 className="fw-bold" style={{ color: "#1565C0" }}>
               Welcome, {user.name} 🌍
@@ -197,7 +207,6 @@ function Home() {
             <p className="text-secondary">{user.email}</p>
           </div>
 
-          {/* Upload Receipt */}
           <div
             className="card p-4 shadow-lg mb-5 border-0 rounded-4"
             data-aos="fade-up"
@@ -226,7 +235,6 @@ function Home() {
             </button>
           </div>
 
-          {/* Latest Carbon Score */}
           {carbonScore > 0 && (
             <div
               className="card p-5 shadow-lg mb-5 border-0 rounded-4 text-center"
@@ -235,15 +243,18 @@ function Home() {
                 background: "linear-gradient(135deg, #F1F8E9, #E3F2FD)",
               }}
             >
-              <h4 className="mb-2 fw-bold text-primary">🌱 Latest Carbon Score</h4>
+              <h4 className="mb-2 fw-bold text-primary">
+                🌱 Latest Carbon Score
+              </h4>
               <h1 className="fw-bold" style={{ color: "#43A047" }}>
                 {carbonScore} kg CO₂e
               </h1>
-              <p className="text-muted">Average Carbon: {avgCarbon} kg CO₂e</p>
+              <p className="text-muted">
+                Average Carbon: {avgCarbon} kg CO₂e
+              </p>
             </div>
           )}
 
-          {/* Carbon History Cards */}
           {carbonHistory.length > 0 && (
             <>
               <h4
@@ -252,61 +263,6 @@ function Home() {
               >
                 📈 Your Carbon Footprint Over Time
               </h4>
-
-              <div className="row g-4 mb-5">
-                {carbonHistory.map((entry, idx) => {
-                  const formattedDate = new Date(entry.date).toLocaleString([], {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
-                  const maxCarbon = 20;
-                  const percent = Math.min(
-                    (entry.totalCarbon / maxCarbon) * 100,
-                    100
-                  );
-                  const bgColor = getTimeColor(entry.date);
-
-                  return (
-                    <div
-                      className="col-md-4"
-                      key={idx}
-                      data-aos="fade-up"
-                      data-aos-delay={idx * 100}
-                    >
-                      <div
-                        className="card shadow-sm p-3 rounded-4 h-100 card-hover"
-                        style={{ background: bgColor }}
-                      >
-                        <h6 className="fw-bold text-secondary">{formattedDate}</h6>
-                        <p className="fw-bold text-success">
-                          {entry.totalCarbon} kg CO₂e
-                        </p>
-                        <div
-                          className="progress rounded-pill"
-                          style={{ height: "20px" }}
-                        >
-                          <div
-                            className="progress-bar"
-                            role="progressbar"
-                            style={{
-                              width: `${percent}%`,
-                              background: `linear-gradient(90deg, #1E88E5, #43A047)`,
-                            }}
-                            aria-valuenow={entry.totalCarbon}
-                            aria-valuemin="0"
-                            aria-valuemax={maxCarbon}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Charts */}
               <div className="row g-4">
                 <div className="col-md-6" data-aos="fade-right">
                   <div className="card p-4 shadow-lg rounded-4">

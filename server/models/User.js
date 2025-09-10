@@ -22,14 +22,19 @@ const TravelSchema = new Schema({
   carbon: { type: Number, required: true }
 });
 
-// Sub-schema for each carbon entry (daily upload)
+// Sub-schema for each carbon entry (bill upload)
 const CarbonEntrySchema = new Schema({
-  date: { type: Date, default: Date.now },
+  uploadDate: { type: Date, default: Date.now }, // exact timestamp
+  entryDate: { 
+    type: String, 
+    default: () => new Date().toISOString().split("T")[0]  // ✅ Correct placement
+  },
   totalCarbon: { type: Number, required: true },
   food: [FoodItemSchema],
   shopping: [ShoppingItemSchema],
   travel: [TravelSchema]
 });
+
 
 // User schema
 const UserSchema = new Schema({
@@ -37,7 +42,7 @@ const UserSchema = new Schema({
   email: { type: String, unique: true, required: true },
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  carbonEntries: [CarbonEntrySchema]  // multiple daily entries
+  carbonEntries: [CarbonEntrySchema]  // multiple uploads allowed per day
 });
 
 const User = mongoose.model("User", UserSchema);

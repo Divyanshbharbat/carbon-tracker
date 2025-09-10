@@ -4,6 +4,7 @@ from difflib import get_close_matches
 
 app = Flask(__name__)
 
+# Known carbon factors for various food items
 CARBON_FACTORS = {
     "ghee": 9.0,
     "milk": 3.2,
@@ -55,7 +56,7 @@ def calculate_carbon():
     total_emission = 0.0
     found_items = {}
 
-    # Split text into lines
+    # Split text into lines and process each
     lines = raw_text.split("\n")
     for line in lines:
         item_name, qty = parse_item_quantity(line)
@@ -65,11 +66,16 @@ def calculate_carbon():
                 factor = CARBON_FACTORS[known_item]
                 emission = qty * factor
                 total_emission += emission
-                found_items[known_item] = {
-                    "count": qty,
-                    "factor": factor,
-                    "emission": round(emission, 2)
-                }
+                # If the item already exists, accumulate the counts and emissions
+                if known_item in found_items:
+                    found_items[known_item]["count"] += qty
+                    found_items[known_item]["emission"] = round(found_items[known_item]["emission"] + emission, 2)
+                else:
+                    found_items[known_item] = {
+                        "count": qty,
+                        "factor": factor,
+                        "emission": round(emission, 2)
+                    }
                 print(f"📊 Calculated emission for '{known_item}': {emission} kgCO2")
             else:
                 print(f"⚠️ Item not recognized: {item_name}")
@@ -77,6 +83,7 @@ def calculate_carbon():
     print("🌍 Total carbon emission:", total_emission)
     print("📋 Item breakdown:", found_items)
 
+    # Return the result to be used by other services like Node.js backend
     return jsonify({
         "status": "success",
         "extracted_text": raw_text,
